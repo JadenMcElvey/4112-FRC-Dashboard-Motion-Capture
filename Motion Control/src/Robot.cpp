@@ -8,6 +8,11 @@
 #include <SmartDashboard/SmartDashboard.h>
 #include <RobotDrive.h>
 #include <Timer.h>
+#include <Talon.h>
+#include <Encoder.h>
+#include <PIDController.h>
+
+using namespace std;
 
 /**
  * This is a demo program showing the use of the RobotDrive class.
@@ -22,11 +27,20 @@
  * instead if you're new.
  */
 class Robot: public frc::SampleRobot {
-	frc::RobotDrive myRobot { 0, 1 }; // robot drive system
+	frc::RobotDrive myRobot {0,1,2,3}; // robot drive system
 	frc::Joystick stick { 0 }; // only joystick
 	frc::SendableChooser<std::string> chooser;
 	const std::string autoNameDefault = "Default";
 	const std::string autoNameCustom = "My Auto";
+	Encoder *leftEnc = new Encoder(0, 1, false, Encoder::EncodingType::k4X);
+	Encoder *rightEnc = new Encoder(2, 3, true, Encoder::EncodingType::k4X);
+	const int wheelDiameter = 8;
+	const int encoderRes = 2048;
+	const float PI = 3.1415927;
+	Talon *frontLeft = new Talon(0);
+	Talon *backLeft = new Talon(1);
+	Talon *frontRight = new Talon(2);
+	Talon *backRight = new Talon(3);
 
 public:
 	Robot() {
@@ -52,25 +66,22 @@ public:
 	 * SendableChooser make sure to add them to the chooser code above as well.
 	 */
 	void Autonomous() {
-		auto autoSelected = chooser.GetSelected();
-		// std::string autoSelected = frc::SmartDashboard::GetString("Auto Selector", autoNameDefault);
+		// auto autoSelected = chooser.GetSelected();
+		std::string autoSelected = frc::SmartDashboard::GetString("Auto Selector", autoNameDefault);
 		std::cout << "Auto selected: " << autoSelected << std::endl;
-
-		if (autoSelected == autoNameCustom) {
-			// Custom Auto goes here
-			std::cout << "Running custom Autonomous" << std::endl;
-			myRobot.SetSafetyEnabled(false);
-			myRobot.Drive(-0.5, 1.0); // spin at half speed
-			frc::Wait(2.0);                // for 2 seconds
-			myRobot.Drive(0.0, 0.0);  // stop robot
-		} else {
-			// Default Auto goes here
-			std::cout << "Running default Autonomous" << std::endl;
-			myRobot.SetSafetyEnabled(false);
-			myRobot.Drive(-0.5, 0.0); // drive forwards half speed
-			frc::Wait(2.0);                // for 2 seconds
-			myRobot.Drive(0.0, 0.0);  // stop robot
+		bool CaptureComplete = false;
+		bool CaptureAuto = false;
+		bool Capturing = frc::SmartDashboard::GetBoolean("Capturing", false);
+		string AutoValues;
+		(8*PI)/EncoderRes
+		AutoValues.resize(11);
+		int Line;
+		if(Capturing)
+		{
+			AutoValues =   + "," +
+			frc::SmartDashboard::PutString("Auto Values", AutoValues);
 		}
+
 	}
 
 	/*
