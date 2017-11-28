@@ -73,12 +73,14 @@ public:
 		bool CaptureAuto = false;
 		bool Capturing = frc::SmartDashboard::GetBoolean("Capturing", false);
 		string AutoValues;
-		(8*PI)/EncoderRes
+		leftEnc->SetDistancePerPulse((wheelDiameter*PI)/encoderRes);
+		rightEnc->SetDistancePerPulse((wheelDiameter*PI)/encoderRes);
 		AutoValues.resize(11);
 		int Line;
 		if(Capturing)
 		{
-			AutoValues =   + "," +
+			AutoValues = to_string(leftEnc->GetDistance())  + "," + to_string(rightEnc->GetDistance()) + "\n";
+			cout << AutoValues;
 			frc::SmartDashboard::PutString("Auto Values", AutoValues);
 		}
 
