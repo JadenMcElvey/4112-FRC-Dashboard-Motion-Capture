@@ -32,15 +32,11 @@ class Robot: public frc::SampleRobot {
 	frc::SendableChooser<std::string> chooser;
 	const std::string autoNameDefault = "Default";
 	const std::string autoNameCustom = "My Auto";
-	Encoder *leftEnc = new Encoder(0, 1, false, Encoder::EncodingType::k4X);
-	Encoder *rightEnc = new Encoder(2, 3, true, Encoder::EncodingType::k4X);
+	Encoder *leftEnc = new Encoder(5, 4, false, Encoder::EncodingType::k4X);
+	Encoder *rightEnc = new Encoder(7, 6, true, Encoder::EncodingType::k4X);
 	const int wheelDiameter = 8;
 	const int encoderRes = 2048;
 	const float PI = 3.1415927;
-	Talon *frontLeft = new Talon(0);
-	Talon *backLeft = new Talon(1);
-	Talon *frontRight = new Talon(2);
-	Talon *backRight = new Talon(3);
 
 public:
 	Robot() {
@@ -67,22 +63,27 @@ public:
 	 */
 	void Autonomous() {
 		// auto autoSelected = chooser.GetSelected();
+		myRobot.SetSafetyEnabled(false);
 		std::string autoSelected = frc::SmartDashboard::GetString("Auto Selector", autoNameDefault);
 		std::cout << "Auto selected: " << autoSelected << std::endl;
-		bool CaptureComplete = false;
-		bool CaptureAuto = false;
-		bool Capturing = frc::SmartDashboard::GetBoolean("Capturing", false);
-		string AutoValues;
+		bool Capturing = frc::SmartDashboard::GetBoolean("Capturing", true);
 		leftEnc->SetDistancePerPulse((wheelDiameter*PI)/encoderRes);
 		rightEnc->SetDistancePerPulse((wheelDiameter*PI)/encoderRes);
-		AutoValues.resize(11);
-		int Line;
 		if(Capturing)
 		{
-			AutoValues = to_string(leftEnc->GetDistance())  + "," + to_string(rightEnc->GetDistance()) + "\n";
-			cout << AutoValues;
-			frc::SmartDashboard::PutString("Auto Values", AutoValues);
+			string AutoValues;
+			for(int i = 0; i < 300; ++i)
+			{
+				AutoValues += to_string(leftEnc->GetDistance())  + "," + to_string(rightEnc->GetDistance()) + "\n";
+				frc::Wait(0.05);
+			}
+			cout << AutoValues << endl;
+			frc::SmartDashboard::PutString("AutoValues", AutoValues);
+			frc::SmartDashboard::PutBoolean("WriteCapture", true);
 		}
+
+
+
 
 	}
 
