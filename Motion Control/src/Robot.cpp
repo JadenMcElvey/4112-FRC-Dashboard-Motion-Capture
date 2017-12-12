@@ -1,8 +1,11 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
+#include <algorithm>
 
 #include <Joystick.h>
+#include <Talon.h>
 #include <SampleRobot.h>
 #include <SmartDashboard/SendableChooser.h>
 #include <SmartDashboard/SmartDashboard.h>
@@ -12,7 +15,6 @@
 #include <Encoder.h>
 #include <PIDController.h>
 
-using namespace std;
 
 /**
  * This is a demo program showing the use of the RobotDrive class.
@@ -34,12 +36,21 @@ class Robot: public frc::SampleRobot {
 	const std::string autoNameCustom = "My Auto";
 	Encoder *leftEnc = new Encoder(5, 4, false, Encoder::EncodingType::k4X);
 	Encoder *rightEnc = new Encoder(7, 6, true, Encoder::EncodingType::k4X);
+	Talon fleftDrive {0};
+	Talon frightDrive {1};
+	Talon bleftDrive {2};
+	Talon brightDrive {3};
+	double p = 0.1;
+	double i = 0.0;
+	double d = 0.001;
 	const int wheelDiameter = 8;
 	const int encoderRes = 2048;
 	const float PI = 3.1415927;
 
+
 public:
 	Robot() {
+
 		//Note SmartDashboard is not initialized here, wait until RobotInit to make SmartDashboard calls
 		myRobot.SetExpiration(0.1);
 	}
@@ -69,17 +80,55 @@ public:
 		bool Capturing = frc::SmartDashboard::GetBoolean("Capturing", true);
 		leftEnc->SetDistancePerPulse((wheelDiameter*PI)/encoderRes);
 		rightEnc->SetDistancePerPulse((wheelDiameter*PI)/encoderRes);
+		frc::SmartDashboard::PutBoolean("WriteCapture", false);
+		frc::SmartDashboard::PutBoolean("ReadCapture", false);
 		if(Capturing)
 		{
-			string AutoValues;
+			std::string WriteValues;
 			for(int i = 0; i < 300; ++i)
 			{
-				AutoValues += to_string(leftEnc->GetDistance())  + "," + to_string(rightEnc->GetDistance()) + "\n";
+				WriteValues += std::to_string(leftEnc->GetDistance())  + "," + std::to_string(rightEnc->GetDistance()) + "\n";
 				frc::Wait(0.05);
 			}
-			cout << AutoValues << endl;
-			frc::SmartDashboard::PutString("AutoValues", AutoValues);
+			std::cout << WriteValues << std::endl;
+			frc::SmartDashboard::PutString("AutoValues", WriteValues);
 			frc::SmartDashboard::PutBoolean("WriteCapture", true);
+		}
+		else
+		{
+			PIDController PIDfleft(p, i, d, leftEnc, &fleftDrive);
+			PIDController PIDbleft(p, i, d, leftEnc, &bleftDrive);
+			PIDController PIDfright(p, i, d, leftEnc, &frightDrive);
+			PIDController PIDbright(p, i, d, leftEnc, &brightDrive);
+			PIDfleft.SetOutputRange(0, 1);
+			PIDbleft.SetOutputRange(0, 1);
+			PIDfright.SetOutputRange(0, 1);
+			PIDbright.SetOutputRange(0, 1);
+			frc::SmartDashboard::PutBoolean("ReadCapture", true);
+			std:: vector<std::string> empty;
+			std::vector<std::string> readValues = frc::SmartDashboard::GetStringArray("ReadValue", empty);
+			for(std::vector<std::string>::iterator i = readValues.begin(); i != readValues.end(); ++i)
+			{
+				std::string delimiter = ",";
+				std::string leftDistance;
+				leftDistance.resize(8);
+				std::string rightDistance;
+				rightDistance.resize(8);
+				std::string::iterator delimitIter;
+				delimitIter = std::search(i->begin(), i->end(), delimiter.begin(), delimiter.end());
+				std::copy(i->begin(), delimitIter, leftDistance.begin());
+				std::copy(delimitIter, i->end(), rightDistance.begin());
+				PIDfleft.SetSetpoint(stod(leftDistance));
+				PIDbleft.SetSetpoint(stod(leftDistance));
+				PIDfright.SetSetpoint(stod(rightDistance));
+				PIDbright.SetSetpoint(stod(rightDistance));
+				PIDfleft.Enable();
+				PIDbleft.Enable();
+				PIDfright.Enable();
+				PIDbright.Enable();
+				frc::Wait(0.05);
+			}
+
 		}
 
 
