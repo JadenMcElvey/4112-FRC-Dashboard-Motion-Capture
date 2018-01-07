@@ -127,10 +127,6 @@ public:
 				PIDfright.Enable();
 				PIDbright.Enable();
 				frc::Wait(0.05);
-				PIDfleft.Disable();
-				PIDbleft.Disable();
-				PIDfright.Disable();
-				PIDbright.Disable();
 			}
 
 		}
